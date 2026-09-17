@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#4f46e5" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <title>Математика 5 класс — Каталог уроков и тренажёров</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- ВЕРХНЯЯ ПАНЕЛЬ (NAVBAR) -->
+    <nav class="top-nav">
+      <div class="brand" onclick="showCatalog()" title="На главную к списку тем">
+        <span>📐 Математика</span>
+        <span class="brand-badge">5 КЛАСС</span>
+      </div>
+
+      <div class="nav-actions">
+        <button class="icon-btn" id="sound-btn" onclick="toggleSound()" title="Включить/выключить звук">🔊</button>
+        <button class="icon-btn" onclick="toggleFullscreen()" title="Полноэкранный режим (для смарт-доски)">⛶</button>
+      </div>
+    </nav>
+
+    <!-- ====================================================================
+         ЭКРАН 1: ГЛАВНЫЙ КАТАЛОГ ТЕМ УРОКОВ (Отображается при входе)
+         ==================================================================== -->
+    <main id="view-catalog" class="view-section">
+      <div class="catalog-hero">
+        <div class="hero-badge">🎓 Обучающий портал</div>
+        <h1 class="hero-title">Темы уроков по математике</h1>
+        <p class="hero-subtitle">Выбери тему, чтобы перейти к интерактивному тренажёру, классной работе или домашнему заданию</p>
+      </div>
+
+      <div class="catalog-header-bar">
+        <div class="catalog-count" id="topics-count-badge">Доступно тем: 2</div>
+        <div class="catalog-search-wrap">
+          <input 
+            type="text" 
+            id="topics-search-input" 
+            class="catalog-search" 
+            placeholder="🔍 Поиск темы..." 
+            oninput="filterTopics(this.value)"
+          />
+        </div>
+      </div>
+
+      <!-- СЕТКА КАРТОЧЕК ТЕМ -->
+      <div class="catalog-cards-grid" id="catalog-cards">
+        <!-- Карточки генерируются динамически из topics/topics.json -->
+      </div>
+    </main>
+
+    <!-- ====================================================================
+         ЭКРАН 2: СТРАНИЦА ВЫБРАННОГО УРОКА (Тренажёр, Классная, Домашняя)
+         ==================================================================== -->
+    <div id="view-lesson" class="view-section hidden">
+      
+      <!-- Кнопка возврата к списку тем -->
+      <div class="lesson-top-bar">
+        <button class="btn-back" onclick="showCatalog()">
+          <span class="back-arrow">←</span>
+          <span>Все темы уроков</span>
+        </button>
+        <span class="lesson-grade-badge">5 класс</span>
+      </div>
+
+      <!-- БАННЕР ВЫБРАННОЙ ТЕМЫ -->
+      <section class="topic-banner">
+        <div class="topic-info">
+          <div class="topic-icon" id="topic-icon">➗</div>
+          <div class="topic-details">
+            <h1 id="topic-title">Порядок действий без скобок</h1>
+            <p id="topic-desc">Сначала умножение и деление, затем сложение и вычитание!</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- ВКЛАДКИ РАЗДЕЛОВ -->
+      <div class="nav-tabs">
+        <button class="tab-btn active" onclick="switchTab('quiz')">
+          <span>🎯</span>
+          <span>Интерактивный тренажёр</span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('classwork')">
+          <span>🏫</span>
+          <span>Классная работа</span>
+          <span id="tab-cw-badge" class="tab-counter"></span>
+        </button>
+        <button class="tab-btn" onclick="switchTab('homework')">
+          <span>🏠</span>
+          <span>Домашнее задание</span>
+          <span id="tab-hw-badge" class="tab-counter"></span>
+        </button>
+      </div>
+
+      <!-- 1. ИНТЕРАКТИВНЫЙ ТРЕНАЖЁР -->
+      <div id="tab-quiz" class="card"></div>
+
+      <!-- 2. КЛАССНАЯ РАБОТА -->
+      <section id="tab-classwork" class="card hidden">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🏫 Классная работа</div>
+            <div class="section-subtitle">Реши примеры в тетради или на черновике и проверь себя</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="action-btn" style="padding: 8px 16px; font-size: 0.9rem; min-height: 42px;" onclick="checkAllTasks('cw')">Проверить всё ✔</button>
+            <button class="secondary-btn" style="padding: 8px 14px; border-radius: 10px; cursor: pointer; min-height: 42px; font-weight: 700;" onclick="resetTasks('cw')">Очистить 🔄</button>
+          </div>
+        </div>
+
+        <div class="tasks-summary-bar">
+          <div>Решено верно: <span id="cw-correct-count" style="color: var(--success); font-weight: 800;">0</span> из <span id="cw-total-count">25</span></div>
+          <div id="cw-praise" style="color: var(--text-muted); font-size: 0.9rem;">Вводи ответы и нажимай Enter!</div>
+        </div>
+
+        <div class="tasks-grid" id="classwork-container"></div>
+      </section>
+
+      <!-- 3. ДОМАШНЕЕ ЗАДАНИЕ -->
+      <section id="tab-homework" class="card hidden">
+        <div class="section-header">
+          <div>
+            <div class="section-title">🏠 Домашнее задание</div>
+            <div class="section-subtitle">Примеры для закрепления темы с моментальной самопроверкой</div>
+          </div>
+          <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+            <button class="action-btn" style="padding: 8px 16px; font-size: 0.9rem; min-height: 42px;" onclick="checkAllTasks('hw')">Проверить всё ✔</button>
+            <button class="secondary-btn" style="padding: 8px 14px; border-radius: 10px; cursor: pointer; min-height: 42px; font-weight: 700;" onclick="resetTasks('hw')">Очистить 🔄</button>
+          </div>
+        </div>
+
+        <div class="tasks-summary-bar">
+          <div>Решено верно: <span id="hw-correct-count" style="color: var(--success); font-weight: 800;">0</span> из <span id="hw-total-count">25</span></div>
+          <div id="hw-praise" style="color: var(--text-muted); font-size: 0.9rem;">Вводи ответы и нажимай Enter!</div>
+        </div>
+
+        <div class="tasks-grid" id="homework-container"></div>
+      </section>
+    </div>
+
+    <!-- ПОДВАЛ ДЛЯ УЧИТЕЛЯ (Скрытое/аккуратное тестирование новых файлов перед загрузкой в GitHub) -->
+    <footer class="site-footer">
+      <div class="footer-note">Учебные материалы для 5 класса • Темы синхронизируются с GitHub</div>
+      <button class="teacher-preview-btn" onclick="openTeacherModal()" title="Проверить новый файл темы перед публикацией в GitHub">
+        ⚙️ Проверить свой файл темы
+      </button>
+    </footer>
+
+  </div>
+
+  <!-- МОДАЛЬНОЕ ОКНО ДЛЯ ПРЕДПРОСМОТРА ТЕМЫ УЧИТЕЛЕМ -->
+  <div id="teacher-modal" class="modal-overlay hidden" onclick="if(event.target === this) closeTeacherModal()">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>⚙️ Предпросмотр темы из файла</h2>
+        <button class="close-modal-btn" onclick="closeTeacherModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.88rem; color: var(--text-muted); margin-bottom: 16px;">
+          Здесь вы можете локально открыть новый файл темы (.json) и проверить его перед тем, как загрузить в GitHub репозиторий.
+        </p>
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-icon">📥</div>
+          <div class="dropzone-text">+ Выбрать файл темы (.json)</div>
+          <div class="dropzone-hint">Перетащите сюда файл для мгновенной проверки</div>
+          <input type="file" id="teacher-file-input" accept=".json" style="display: none;" />
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
